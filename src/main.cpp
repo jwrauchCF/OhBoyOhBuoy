@@ -17,13 +17,19 @@ String uuid = "ChpChpUsRapi3x3f1d594827f9403380022736f8461dff";
 String auth_code = "50a1f9bd3bfa41d39b84554935c55837";
 String device_id = "motor_test";
 
-HardwareSerial RS485_Serial(1);
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#define ONE_WIRE_BUS 4
 
-#include <ModbusMaster.h>
-ModbusMaster modbus;
-uint8_t modbus_result;
-uint16_t comm = 0x03;
-uint16_t param = 0x0D;
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
+int temperature = 0;
+
+#include <VescUart.h>
+#define RXD1 16
+#define TXD1 17
+
+VescUart UART;
 
 String power = "OFF";
 String direction = "";
@@ -33,23 +39,17 @@ int current = 0;
 float voltage = 0.0;
 int health = 0;
 
+int maxRPM = 8000;
+int minRPM = 50;
+int setRPM = 0;
+int stepSize = 50;
+int delayTime = 20;
 
-typedef struct{
-    int preset_speed = 0x0B;
-    int active_speed = 0x0C;
-    int current = 0x0D;
-    int voltage = 0x0E;
-    int health = 0x0F;
-} _MODBUS_COMMANDS;
-
-_MODBUS_COMMANDS modbus_command;
-
-//not used but needs to be here
-void preTransmission(){}
-void postTransmission(){}
 void setDirection(String val);
 void setSpeed(int val);
 void setPower(String val);
+void accelerate(int val);
+void deccelerate();
 
 //////////////////
 
@@ -58,60 +58,6 @@ void setPower(String val);
 // on fail/error raise general alarm throughout the flock
 // maybe before winching operation there should be first an "arming" stage when a read command is sent to modbus to assess the connection
 // then if ok, return "ok" to the main Lora node and then the main node should issue a global "start" to all minions
-
-void modbusSend(uint16_t command, uint16_t param){
-    Serial.print("sending => ");
-    Serial.print(command);
-    Serial.print(param);
-
-    modbus.begin(1,RS485_Serial);
-    modbus.preTransmission(preTransmission);
-    modbus.postTransmission(postTransmission);
-    modbus_result = modbus.writeSingleRegister(command,param);
-
-    //TODO: we should return the modbus response to the caller function
-    // so we can verify if the command was successful and update the status 
-    // or if it's a fail start some error mode chain of events...maybe try again first and then raise general alert through the entire flock
-
-    if(modbus_result == modbus.ku8MBSuccess){
-        int val = modbus.getResponseBuffer(0);
-
-        Serial.print("modbus responded => ");
-        Serial.println(val);
-        modbus.clearResponseBuffer();
-       
-    }else{
-        Serial.print("modbus response error =>");
-        Serial.println(modbus_result);
-        
-    }
-}
-
-int_least64_t modbusRead(uint16_t command){
-
-    Serial.print("request read => ");
-    Serial.print(command);
-
-    modbus.begin(1,RS485_Serial);
-    modbus.preTransmission(preTransmission);
-    modbus.postTransmission(postTransmission);
-
-    modbus_result = modbus.readHoldingRegisters(command,1);
-    if(modbus_result == modbus.ku8MBSuccess){
-            int val = modbus.getResponseBuffer(0);
-
-            Serial.print("modbus read response => ");
-            Serial.println(val);
-
-            modbus.clearResponseBuffer();
-            return val;
-
-       }else{
-             Serial.print("modbus error reading =>");
-             Serial.println(modbus_result);
-            return -1;
-       }
-}
 
 void setPower(String val){
     if(val == "ON"){
@@ -130,15 +76,26 @@ void setPower(String val){
             return;
         }
 
-        comm = 0x03;
-        param = 0x0D;
+        accelerate(setRPM);
     }else{
-        comm = 0x04;
-        param = 0x00;
+        deccelerate();
     }
-
-    modbusSend(comm,param);
 }
+
+void accelerate(int rpm) {
+    for (int r = minRPM; r < rpm; r += stepSize) {
+        UART.setRPM(r);
+    }
+    UART.setRPM(rpm);
+}
+
+void deccelerate() {
+    for (int r = setRPM; r >= minRPM; r -= stepSize) {
+        UART.setRPM(r);
+    }
+    UART.setRPM(0);
+}
+
 
 void setDirection(String val){
 
@@ -148,29 +105,24 @@ void setDirection(String val){
         ChipChop.triggerEvent("power","OFF");
     }
     if(val == "forward"){
-        comm = 0x07;
-        param = 0x01;
+        direction = "forward";
+        setRPM = abs(setRPM);
     }else{
-        comm = 0x07;
-        param = 0x14;
+        direction = "reverse";
+        setRPM = -1 * abs(setRPM);
     }
-
-    modbusSend(comm,param);
 }
 
 void setSpeed(int val){
 
     // no idea if we can set the speed whilst the motor is running?
-    comm = 0x06;
-    param = val;
-
-    modbusSend(comm,param);
-
-    // int test_speed = modbusRead(modbus_command.preset_speed);
+    speed = val;
+    setRPM = val * maxRPM / 100;
 }
 
 
-unsigned long read_timer = 0;
+unsigned long power_timer = 0;
+unsigned long status_timer = 0;
 
 void ChipChop_onCommandReceived(String target,String value, String command_source, int command_age){
     Serial.println(target);
@@ -179,15 +131,22 @@ void ChipChop_onCommandReceived(String target,String value, String command_sourc
     if(target == "power"){
         power = value;
         setPower(value);
+        ChipChop.updateStatus(target,value);
     }else if(target == "direction"){
-        direction = value;
-        setDirection(direction);
+        if (power == "OFF") {
+            direction = value;
+            setDirection(direction);
+            ChipChop.updateStatus(target,value);
+        }
     }else if(target == "speed"){
-        speed = value.toInt();
-        setSpeed(speed);
+        if (power == "OFF") {
+            speed = value.toInt();
+            setSpeed(speed);
+            ChipChop.updateStatus(target,value);
+        }
     }
 
-    ChipChop.updateStatus(target,value);
+//    ChipChop.updateStatus(target,value);
    
 
 }
@@ -200,16 +159,17 @@ void sendFullStatus(){
     ChipChop.updateStatus("active_speed",active_speed);
     ChipChop.updateStatus("current",current);
     ChipChop.updateStatus("voltage",voltage);
-    ChipChop.updateStatus("health",health);
+    ChipChop.updateStatus("health",temperature);
 }
 
 
-const char *SSID = "GlobeAtHome_d7538_2.4";
-const char *password = "ykB3fSUy";
+//const char *SSID = "GlobeAtHome_d7538_2.4";
+//const char *password = "ykB3fSUy";
+const char *SSID = "Pokedex";
+const char *password = "asdfghjkl";
 
 void setup(){
-    Serial.begin(115200);
-    RS485_Serial.begin(115200, SERIAL_8N1, 16, 17);
+    Serial.begin(9600);
     delay(1000);
 
     WiFi.begin(SSID, password);
@@ -220,7 +180,26 @@ void setup(){
         delay(500);
         Serial.print(".");
     }
+    
+    sensors.begin();
 
+    Serial1.begin(115200, SERIAL_8N1, RXD1, TXD1);
+    delay(1000);
+    UART.setSerialPort(&Serial1);
+
+    if (UART.getVescValues()) {
+        Serial.println("VESC Data Setup Success!");
+        Serial.print("RPM:");
+        Serial.println(UART.data.rpm);
+        Serial.print("Input Voltage:");
+        Serial.println(UART.data.inpVoltage);
+        Serial.print("Amp Hours:");
+        Serial.println(UART.data.ampHours);
+
+        Serial.println("VESC connection successful!");
+      } else {
+        Serial.println("VESC connection failed!");
+      }
 
     ChipChop.debug(true); //set to false for production
     ChipChop.commandCallback(ChipChop_onCommandReceived);
@@ -238,19 +217,34 @@ void loop(){
     ChipChop.run();
     ChipChopPlugins.run();
 
-    if(millis() - read_timer > 10000){
+    //To keep signaling the controller.  IDK how to handle this more cleanly.
+    if ((power == "ON") && (millis() - power_timer > 50)) {
+        UART.setRPM(setRPM);
+        power_timer = millis();
+    }
 
-        // active_speed = modbusRead(modbus_command.active_speed);
-        // delay(1000);
-        // current = modbusRead(modbus_command.current);
-        // delay(1000);
-        int v = modbusRead(modbus_command.voltage);
-        // delay(1000);
-        voltage = v * 0.1;
-        // health = modbusRead(modbus_command.health);
+    if(millis() - status_timer > 1000){
+
+        Serial.println("Preforming status check.");
+
+        UART.getVescValues();
+        sensors.requestTemperatures();
+
+        active_speed = UART.data.rpm / 4;
+        Serial.print("Active Speed = ");
+        Serial.println(active_speed);
+        current = UART.data.avgInputCurrent;
+        Serial.print("Current = ");
+        Serial.println(current);
+        voltage = UART.data.inpVoltage;
+        Serial.print("Voltage = ");
+        Serial.println(voltage);
+        temperature = sensors.getTempCByIndex(0);
+        Serial.print("Temperature = ");
+        Serial.println(temperature);
         // delay(1000);
 
-        read_timer = millis();
+        status_timer = millis();
 
         sendFullStatus();
     }

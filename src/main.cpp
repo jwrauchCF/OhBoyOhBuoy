@@ -15,18 +15,18 @@ extern ChipChopPluginsManager ChipChopPlugins;
 String server_uri = "wss://api3.chipchop.io/wsdev/";
 String uuid = "ChpChpUsRapi3x3f1d594827f9403380022736f8461dff";
 String auth_code = "50a1f9bd3bfa41d39b84554935c55837";
-String device_id = "motor_test";
+String device_id = "motor_test_2";
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#define ONE_WIRE_BUS 4
+#define ONE_WIRE_BUS 6
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 int temperature = 0;
 
 #include <VescUart.h>
-#define RXD1 16
+#define RXD1 18
 #define TXD1 17
 
 VescUart UART;
@@ -123,6 +123,8 @@ void setSpeed(int val){
 
 unsigned long power_timer = 0;
 unsigned long status_timer = 0;
+unsigned long wifi_timer = 0;
+unsigned long wifi_wait = 0;
 
 void ChipChop_onCommandReceived(String target,String value, String command_source, int command_age){
     Serial.println(target);
@@ -163,8 +165,8 @@ void sendFullStatus(){
 }
 
 
-//const char *SSID = "GlobeAtHome_d7538_2.4";
-//const char *password = "ykB3fSUy";
+//const char *SSID = "Buldog 2.4";
+//const char *password = "&ojaZA=h37h0k?pha";
 const char *SSID = "Pokedex";
 const char *password = "asdfghjkl";
 
@@ -221,6 +223,18 @@ void loop(){
     if ((power == "ON") && (millis() - power_timer > 50)) {
         UART.setRPM(setRPM);
         power_timer = millis();
+    }
+
+    if ((WiFi.status() != WL_CONNECTED) && (millis() - wifi_timer > 1000)){
+        Serial.print("Reconnecting to Wifi...");
+//        WiFi.disconnect();
+        WiFi.reconnect();
+        while ((WiFi.status() != WL_CONNECTED) && (millis() - wifi_wait < 60000)){
+            delay(500);
+            Serial.print(".");
+        }
+        wifi_timer = millis();
+        wifi_wait = millis();
     }
 
     if(millis() - status_timer > 1000){

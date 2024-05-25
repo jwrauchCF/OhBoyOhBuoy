@@ -14,78 +14,145 @@
 #ifndef CHIPCHOP_CONFIG_H
 #define CHIPCHOP_CONFIG_H
 //* modules & plugins settings *//
+//global event defs
+#define INIT_ERROR 1
+#define SENSOR_READ_ERROR 2
+
+//the additional hardware serials, we can only have 2 more in addition to the Serial monitor
+#define MOTOR_SERIAL 2
+
+
 // PLUGINS MANAGER
 #define PLUGINS_STARTED 1
-#define PLUGINS_CHIPCHOP_EXISTS 2
+#define PLUGINS_SYSTEM_EXISTS 2
 #define PLUGINS_RUN 3
 #define PLUGINS_TOTAL_EVENTS 3
-#define PLUGINS_TOTAL_CALLBACKS 20
+#define PLUGINS_TOTAL_CALLBACKS 30
 
+//LORA Controller
 
-        // CHIPCHOP ENGINE
-        #define CC_SOCKET_CLOSED 1
-        #define CC_CONNECTED 2
-        #define CC_COMMAND_RECEIVED 3
-        #define CC_TOTAL_EVENTS 3
-        #define CC_TOTAL_CALLBACKS 12
-        #define CC_MAX_COMPONENTS 10
-        //settings
-        #define CC_CAN_RUN 1
-        #define CC_SEND_RATE 510
-        #define CC_HEARTBEAT_INTERVAL 10000
-        #define CC_USE_CLOCK 1
-        #define CC_DATE_FORMAT "dd MM YY - hh:mm:ss"
-        // KEEP ALIVE
-        #define KEEP_ALIVE_EXISTS
-        #define KEEP_ALIVE_OFF 0
-        #define KEEP_ALIVE_WIFI 1
-        #define KEEP_ALIVE_RESTART 2
-        #define KEEP_ALIVE_AUTO 3
-        //events
-        #define KEEP_ALIVE_RESTARTING 1
-        #define KEEP_ALIVE_TOTAL_EVENTS 1
-        #define KEEP_ALIVE_TOTAL_CALLBACKS 10
-        //settings
+ // lilygo or heltec
+#define LILYGO 1
+#define HELTEC_STICK 2
+#define HELTEC_V2 3
+#define LORA_BOARD HELTEC_STICK
+
+#define LORA_EXISTS
+
+#define LORA_IDLE 0
+#define LORA_SENDING 1
+#define LORA_RECEIVING 2
+ //noter: these types must not be declared as 0 (zero)
+#define LORA_BEACON 1
+#define LORA_NODE 2
+#define LORA_BASE 3
+
+#define LORA_SWARM_SIZE 5
+#define MY_LORA_MODE LORA_NODE
+#define MY_LORA_GROUP "boybuoy"
+#define MY_LORA_ID "esp1"
+
+//todo: define lora events
+#define LORA_MESSAGE_RECEIVED 1
+#define LORA_PING_RECEIVED 2
+#define LORA_SWARM_HELLO 3
+
+#define LORA_TOTAL_EVENTS 3
+#define LORA_TOTAL_CALLBACKS 6
+
+// CHIPCHOP ENGINE
+#define CC_SOCKET_CLOSED 1
+#define CC_CONNECTED 2
+#define CC_COMMAND_RECEIVED 3
+#define CC_TOTAL_EVENTS 3
+#define CC_TOTAL_CALLBACKS 12
+#define CC_MAX_COMPONENTS 10
+//settings
+#define CC_CAN_RUN 1
+#define CC_SEND_RATE 510
+#define CC_HEARTBEAT_INTERVAL 10000
+#define CC_USE_CLOCK 1
+#define CC_DATE_FORMAT "dd MM YY - hh:mm:ss"
+
+//System Controller
+#define SYSTEM_EXISTS
+#define SYSTEM_STATUS_RECEIVED 1
+#define SYSTEM_EVENT_RECEIVED 2
+#define SYSTEM_COMMAND_RECEIVED 3
+#define SYSTEM_TOTAL_EVENTS 3
+#define SYSTEM_TOTAL_CALLBACKS 20
+
+//Victron Manager
+#define VICTRON_EXISTS
+//todo: define victron events
+
+#define VICTRON_TOTAL_EVENTS 1
+#define VICTRON_TOTAL_CALLBACKS 4
+
+//Motor Controller
+#define MOTOR_CONTROLLER_EXISTS
+//Motor VESC settings
+#define MOTOR_RX 18
+#define MOTOR_TX 17
+
+//todo: define motor events
+#define MOTOR_CONTROLLER_RUNNING 1
+#define MOTOR_CONTROLLER_STOPPED 2
+#define MOTOR_CONTROLLER_ERROR 3
+#define MOTOR_CONTROLLER_STATUS 4
+
+#define MOTOR_CONTROLLER_TOTAL_EVENTS 4
+#define MOTOR_CONTROLLER_TOTAL_CALLBACKS 6
+
+//Temperature Controller
+#define TEMPERATURE_CONTROLLER_EXISTS
+#define TEMPERATURE_NEW_READING 1
+#define TEMPERATURE_CONTROLLER_TOTAL_EVENTS 1
+#define TEMPERATURE_CONTROLLER_TOTAL_CALLBACKS 4
+#define TEMPERATURE_CONTROLLER_MAX_SENSORS 10
+
+//DS1820 temperature Sensors
+#define DS1820_PIN 2
+#define DS1820_READ_INTERVAL 10000
+//specify the DS1820 sensors by name and initial temperature value i.e -1000.0
+#define DS1820_TOTAL_SENSORS 2
+#define DS1820_SENSOR_LIST {{"ambient1",-1000.0},{"ambient2",-1000.0}}
+
+//Cooling Controller
+#define COOLING_CONTROLLER_EXISTS
+#define COOLING_CONTROLLER_TOTAL_EVENTS 1
+#define COOLING_CONTROLLER_TOTAL_CALLBACKS 4
+
+//Winch Monitor
+#define WINCH_EXISTS
+#define WINCH_DEPTH_REACHED 1
+#define WINCH_TOTAL_EVENTS 1
+#define WINCH_TOTAL_CALLBACKS 4
+
+//GPS
+#define GPS_EXISTS
+
+//Gyroscope
+#define GYRO_EXISTS
+#define GYRO "gyro"
+#define GYRO_VALUES 1
+#define GYRO_TEMPERATURE 2
+#define GYRO_TOTAL_EVENTS 2
+#define GYRO_TOTAL_CALLBACKS 4
+
+//RTC
+#define RTC_EXISTS
+#define RTC_ALARM_1 1
+#define RTC_ALARM_2 2
+#define RTC_TOTAL_EVENTS 2
+#define RTC_TOTAL_CALLBACKS 4
+
+// PrefsManager
+#define PREFS_MANAGER_EXISTS
+#define PREFS_MANAGER_TOTAL_EVENTS 1
+#define PREFS_MANAGER_TOTAL_CALLBACKS 4
+//settings
+#define PREFS_MANAGER_AUTO_SAVE 1
         
-        #define KEEP_ALIVE_MODE KEEP_ALIVE_AUTO
-        #define KEEP_ALIVE_TIMEOUT 120000
-        // PrefsManager
-        #define PREFS_MANAGER_EXISTS
-        #define PREFS_MANAGER_TOTAL_EVENTS 1
-        #define PREFS_MANAGER_TOTAL_CALLBACKS 4
-        //settings
-        
-        #define PREFS_MANAGER_AUTO_SAVE 1
-        // OTA
-        #define OTA_EXISTS
-        //settings
-        
-        #define OTA_FIRMWARE_VS "1.0"
-        // WIFI PORTAL
-        #define WIFI_PORTAL_EXISTS
-        #define WIFI_PORTAL_STARTING 1
-        #define WIFI_PORTAL_CONNECTING 2
-        #define WIFI_PORTAL_LOADING_CREDENTIALS 3
-        #define WIFI_PORTAL_SAVING_CREDENTIALS 4
-        #define WIFI_PORTAL_RECONNECTING 5
-        #define WIFI_PORTAL_CLOSING 6
-        #define WIFI_PORTAL_RESTARTING 7
-        #define WIFI_PORTAL_CONNECTED 7
-        #define WIFI_PORTAL_DISCONNECTED 8
-        #define WIFI_PORTAL_ERROR 9
-        //events
-        #define WIFI_PORTAL_STATUS 1
-        #define WIFI_PORTAL_TOTAL_EVENTS 1
-        #define WIFI_PORTAL_TOTAL_CALLBACKS 4
-        //settings
-        
-        #define WIFI_PORTAL_AP_SSID "Motor"
-        #define WIFI_PORTAL_AP_PASS ""
-        #define WIFI_PORTAL_START_CHIPCHOP_ON_CONNECT 1
-        #define WIFI_PORTAL_CONNECT_TO "ANY_KEEP_PREFERRED"
-        #define WIFI_PORTAL_RECONNECT_INTERVAL 30000
-        #define WIFI_PORTAL_TIMEOUT 180000
-        #define WIFI_PORTAL_AUTO_RESTART 1
-        #define WIFI_PORTAL_AUTO_RECONNECT 1
 
 #endif

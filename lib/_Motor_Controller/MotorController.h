@@ -28,7 +28,7 @@ class MotorManager{
 
         int maxRPM = 8000;
         int minRPM = 900;
-        int current_RPM = 0;
+        int current_RPM = 8000;
         int stepSize = 50;
         int delayTime = 20; //???
 
@@ -48,7 +48,7 @@ class MotorManager{
 
         MotorManager();
         void setDirection(bool val);
-        void setSpeed(int val);
+//        void setSpeed(int val);
         void setPower(bool val);
         void start_motor(int val);
         void stop_motor();

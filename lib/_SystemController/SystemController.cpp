@@ -89,8 +89,8 @@ void SystemManager::handleMotor(String command, String value){
             MotorController.setDirection(0);
         }
         
-    }else if(command == "speed"){
-        MotorController.setSpeed(value.toInt());
+//    }else if(command == "speed"){
+//        MotorController.setSpeed(value.toInt());
     }
 }
 

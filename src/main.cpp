@@ -56,8 +56,8 @@ void ChipChop_onCommandReceived(String target_component,String value, String sou
                 MotorController.setDirection(0);
             }
             
-        }else if(target_component == "speed"){
-            MotorController.setSpeed(value.toInt());
+//        }else if(target_component == "speed"){
+//            MotorController.setSpeed(value.toInt());
         }
 
         ChipChop.updateStatus(target_component,value);

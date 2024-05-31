@@ -90,24 +90,24 @@ void MotorManager::setDirection(bool val){
     }
     if(val == 1){
         direction = 1;
-        current_RPM = abs(current_RPM);
+        current_RPM = abs(maxRPM);
     }else{
         direction = 0;
-        current_RPM = -1 * abs(current_RPM);
+        current_RPM = -1 * abs(maxRPM);
     }
 }
 
-void MotorManager::setSpeed(int val){
-
-    // no idea if we can set the speed whilst the motor is running?
-    speed = val;
-    int r = val * (maxRPM-minRPM) / 100 + minRPM;
-    if ((r > minRPM) && (r < maxRPM)) {
-        current_RPM = r;
-    } else {
-        current_RPM = 0;
-    }
-}
+//void MotorManager::setSpeed(int val){
+//
+//    // no idea if we can set the speed whilst the motor is running?
+//    speed = val;
+//    int r = val * (maxRPM-minRPM) / 100 + minRPM;
+//    if ((r > minRPM) && (r < maxRPM)) {
+//        current_RPM = r;
+//    } else {
+//        current_RPM = 0;
+//    }
+//}
 
 void MotorManager::getStatus(){
         UART.getVescValues();

@@ -31,7 +31,7 @@
 
 //LORA Controller
 
- // lilygo or heltec
+// lilygo or heltec
 #define LILYGO 1
 #define HELTEC_STICK 2
 #define HELTEC_V2 3
@@ -42,7 +42,7 @@
 #define LORA_IDLE 0
 #define LORA_SENDING 1
 #define LORA_RECEIVING 2
- //noter: these types must not be declared as 0 (zero)
+//noter: these types must not be declared as 0 (zero)
 #define LORA_BEACON 1
 #define LORA_NODE 2
 #define LORA_BASE 3

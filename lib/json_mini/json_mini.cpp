@@ -46,14 +46,24 @@ String json_mini::find(const String obj, const String& property){
     } 
     start = obj.indexOf(name) + name.length() + 1; // jumps over the closing " and :
     next = obj.charAt(start);
+//    Serial.print("next char = "); Serial.println(next);
 
     if(next == '"'){ //if start of string else start of number
         start ++;
+//        next = obj.charAt(start);
+//        if(next == '{'){
+//            String temp = obj.substring(start, obj.length() - 1);
+//            end = temp.indexOf("}") + 1;
+//            Serial.print("end index = "); Serial.println(end);
+//            Serial.print("end char = "); Serial.println(temp.charAt(end));
+//            return temp.substring(0, end);
     }else if(next == '{'){ //it's a json object sent as a value, most likely a copy of another device status
         // in this case we are simply looking for the next closing double bracket }}
         // as ChipChop json is in a standardised format it's only in this situation that it can contain a double "}}"
         String temp = obj.substring(start, obj.length() - 1);
         end = temp.indexOf("}") + 1;
+        Serial.print("end index = "); Serial.println(end);
+        Serial.print("end char = "); Serial.println(temp.charAt(end));
         return temp.substring(0, end);
         // start++;
 
@@ -63,12 +73,17 @@ String json_mini::find(const String obj, const String& property){
     
     while(i++ < obj.length() -1){
         
+//        Serial.print("char at i = "); Serial.println(obj.charAt(i));
         if(obj.charAt(i) == '}'){
             end = i - 1;
              if(obj.charAt(i - 1) != '"'){ //if start of string else start of number
                 end ++;
             }
             break;
+        }else if(obj.charAt(i-1) == '{'){
+            String temp = obj.substring(start, obj.length()-1);
+            end = temp.indexOf("}") + 1;
+            return temp.substring(0, end);
         }else if(obj.charAt(i + 1) == ',' && obj.charAt(i + 2) == '"' ){
             end = i;
              if(obj.charAt(i) != '"'){ //if start of string else start of number

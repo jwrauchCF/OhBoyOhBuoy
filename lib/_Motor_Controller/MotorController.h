@@ -47,7 +47,7 @@ class MotorManager{
     public:
 
         MotorManager();
-        void setDirection(bool val, bool start_immediately);
+        void setDirection(bool val);
         void setSpeed(int val);
         void setPower(bool val);
         void start_motor(int val);
@@ -64,19 +64,6 @@ class MotorManager{
         void preStartCheck(){
             getStatus();
             sendStatus();
-        }
-
-        void goToTarget(){
-            check_travel = 1;
-            travel_check_timer = 0;
-            travel_distance = target_distance;
-            setDirection(1, 1); //set the direction and start immediately
-        }
-        void goHome(){
-            check_travel = 1;
-            travel_check_timer = 0;
-            travel_distance = 0.0;
-            setDirection(0, 1);
         }
 
         void init();

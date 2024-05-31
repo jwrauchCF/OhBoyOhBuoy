@@ -51,9 +51,9 @@ void ChipChop_onCommandReceived(String target_component,String value, String sou
             
         }else if(target_component == "direction"){
             if(value == "forward"){
-                MotorController.goToTarget();
+                MotorController.setDirection(1);
             }else{
-                MotorController.goHome();
+                MotorController.setDirection(0);
             }
             
         }else if(target_component == "speed"){

@@ -53,6 +53,7 @@ void SystemManager::start(){
 ///**** LORA MESSAGE HANDLER ****////
 void SystemManager::handleLoraMessage(const String& msg){
 
+    Serial.print("msg = "); Serial.println(msg);
     String command = JSON.find(msg, "command"); 
     String target = JSON.find(msg, "target"); 
     String value = JSON.find(msg, "value"); 
@@ -74,16 +75,18 @@ void SystemManager::handleMotor(String command, String value){
     Serial.println(value);
     if(command == "power"){
         if(value == "ON"){
+//            Serial.println("Starting motor");
             MotorController.setPower(1);
         }else{
+//            Serial.println("Stopping motor");
             MotorController.setPower(0);
         }
         
     }else if(command == "direction"){
         if(value == "forward"){
-            MotorController.goToTarget();
+            MotorController.setDirection(1);
         }else{
-            MotorController.goHome();
+            MotorController.setDirection(0);
         }
         
     }else if(command == "speed"){

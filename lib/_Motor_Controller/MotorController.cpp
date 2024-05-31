@@ -55,24 +55,33 @@ void MotorManager::setPower(bool val){
 }
 
 void MotorManager::start_motor(int rpm) {
+    Serial.println("Starting ramp up");
     for (int r = minRPM; r < rpm; r += stepSize) {
         UART.setRPM(r);
+        delay(20);
     }
     UART.setRPM(rpm);
+    getStatus();
+    power = 1;
+    Serial.println("Set power to 1");
     emit_event(MOTOR_CONTROLLER_RUNNING);
 }
 
 void MotorManager::stop_motor() {
+    Serial.println("Starting ramp down");
     for (int r = current_RPM; r >= minRPM; r -= stepSize) {
         UART.setRPM(r);
+        delay(20);
     }
     UART.setRPM(0);
-
+    getStatus();
+    power = 0;
+    Serial.println("Set power to 0");
     emit_event(MOTOR_CONTROLLER_STOPPED);
 }
 
 
-void MotorManager::setDirection(bool val, bool start_immediately){
+void MotorManager::setDirection(bool val){
 
     //if motor is running, stop it and then change direction
     if(power == 1){
@@ -86,11 +95,6 @@ void MotorManager::setDirection(bool val, bool start_immediately){
         direction = 0;
         current_RPM = -1 * abs(current_RPM);
     }
-
-    if(start_immediately){
-        start_motor(current_RPM); 
-    }
-
 }
 
 void MotorManager::setSpeed(int val){
@@ -110,6 +114,12 @@ void MotorManager::getStatus(){
         active_speed = UART.data.rpm / 4;
         current = UART.data.avgInputCurrent;
         voltage = UART.data.inpVoltage;
+        Serial.print("RPM:");
+        Serial.println(active_speed);
+        Serial.print("Input Voltage:");
+        Serial.println(voltage);
+        Serial.print("Input Current:");
+        Serial.println(current);
 
         //TODO: do an error check, if the UART.getVescValues() fails flag the health to an error and broadcast it as an event
 

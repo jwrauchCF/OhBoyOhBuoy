@@ -42,18 +42,18 @@ void LoraManager::init(){
 void LoraManager::run(){
     loraEngine.run();
 
-    if(millis() - last_ping_time > ping_frequency){
-        for(byte i = 0; i < LORA_SWARM_SIZE;i++){
-            if(my_swarm[i].lora_id != MY_LORA_ID){
-                if(my_swarm[i].last_ping < (millis() - 30000)){
-                    my_swarm[i].isAlive = 0;
-                    my_swarm[i].signal_strength = -1000;
-                }
-            }
-        }
-        send("all","ok","ping");
-        last_ping_time = millis(); 
-    }
+//    if(millis() - last_ping_time > ping_frequency){
+//        for(byte i = 0; i < LORA_SWARM_SIZE;i++){
+//            if(my_swarm[i].lora_id != MY_LORA_ID){
+//                if(my_swarm[i].last_ping < (millis() - 30000)){
+//                    my_swarm[i].isAlive = 0;
+//                    my_swarm[i].signal_strength = -1000;
+//                }
+//            }
+//        }
+//        send("all","ok","ping");
+//        last_ping_time = millis(); 
+//    }
 
 }
 

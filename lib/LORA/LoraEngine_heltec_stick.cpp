@@ -12,7 +12,7 @@ LoraEngine::LoraEngine(){
 }
 
 #define PAUSE               30
-#define FREQUENCY           905.2       // for US
+#define FREQUENCY           915.0       // for US
 #define BANDWIDTH           250.0
 #define SPREADING_FACTOR    9
 #define TRANSMIT_POWER      22

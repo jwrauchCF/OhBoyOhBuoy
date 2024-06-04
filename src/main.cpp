@@ -23,6 +23,7 @@ String device_id = "motor_test_1";
 
 
 const String _quote = "\"";
+String trgt = "all";
 
 #if MY_LORA_MODE == LORA_NODE
 void ChipChop_onCommandReceived(String target_component,String value, String source, int command_age){
@@ -39,10 +40,9 @@ void ChipChop_onCommandReceived(String target_component,String value, String sou
         String request = JSON.stringify(obj, obj_length);
         request = request + " ";
 
-        LoraController.send("all",request,"set");
 
-
-        if(target_component == "power"){
+        Serial.print("target esp is.... "); Serial.println(trgt);
+        if((target_component == "power") && ((trgt == MY_LORA_ID) || (trgt == "all"))){
             if(value == "ON"){
                 MotorController.setPower(1);
             }else{
@@ -55,10 +55,12 @@ void ChipChop_onCommandReceived(String target_component,String value, String sou
             }else{
                 MotorController.setDirection(0);
             }
-            
-//        }else if(target_component == "speed"){
-//            MotorController.setSpeed(value.toInt());
-        }
+
+        } else if (target_component == "Select"){
+            trgt = value;
+            }
+
+        LoraController.send(trgt ,request,"set");
 
         ChipChop.updateStatus(target_component,value);
    
@@ -76,6 +78,7 @@ void setup(){
     #if MY_LORA_MODE == LORA_NODE
 
         WiFi.begin("Buldog 2.4", "&ojaZA=h37h0k?pha");
+//        WiFi.begin("Pokedex", "asdfghjkl");
 
         Serial.print("WiFi Connecting");
         while (WiFi.status() != WL_CONNECTED)

@@ -25,10 +25,11 @@ class MotorManager{
         bool power = 0;
         bool direction = 1; // 1. forward 0.back
         int speed = 20;
+        bool active = 1;
 
-        int maxRPM = 8000;
+        int maxRPM = 6750;
         int minRPM = 900;
-        int current_RPM = 8000;
+        int current_RPM = 6750;
         int stepSize = 50;
         int delayTime = 20; //???
 
@@ -50,6 +51,7 @@ class MotorManager{
         void setDirection(bool val);
 //        void setSpeed(int val);
         void setPower(bool val);
+        void setActive(bool val);
         void start_motor(int val);
         void stop_motor();
 

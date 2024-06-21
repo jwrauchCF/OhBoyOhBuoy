@@ -14,7 +14,7 @@ LoraEngine::LoraEngine(){
 #define PAUSE               30
 #define FREQUENCY           915.0       // for US
 #define BANDWIDTH           250.0
-#define SPREADING_FACTOR    9
+#define SPREADING_FACTOR    10
 #define TRANSMIT_POWER      22
 
 #define BUFFER_SIZE        255 // Define the payload size here

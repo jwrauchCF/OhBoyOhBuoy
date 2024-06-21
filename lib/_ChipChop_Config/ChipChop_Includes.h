@@ -4,6 +4,8 @@ extern json_mini JSON;
 extern ChipChopPrefsManager PrefsManager;
 #include <LoraController.h>
 extern LoraManager LoraController;
+#include <ChipChopWifiPortal.h>
+extern ChipChopWifiPortal WifiPortal;
 #include <TemperatureController.h>
 extern TemperatureManager TemperatureController;
 #include <VictronMonitor.h>
@@ -28,6 +30,7 @@ class pluginsInit{
     void start(){ 
 
         PrefsManager.init();
+        WifiPortal.init();
         LoraController.init();
         TemperatureController.init();
         DS1820.init();

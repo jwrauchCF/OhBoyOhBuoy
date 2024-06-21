@@ -25,7 +25,7 @@ String device_id = "motor_test_1";
 const String _quote = "\"";
 String trgt = "all";
 
-#if MY_LORA_MODE == LORA_NODE
+//#if MY_LORA_MODE == LORA_NODE || MY_LORA_MODE == LORA_BASE
 void ChipChop_onCommandReceived(String target_component,String value, String source, int command_age){
         Serial.println(target_component);
         Serial.println(value);
@@ -41,7 +41,7 @@ void ChipChop_onCommandReceived(String target_component,String value, String sou
         request = request + " ";
 
 
-        Serial.print("target esp is.... "); Serial.println(trgt);
+        #if MY_LORA_MODE == LORA_NODE
         if((target_component == "power") && ((trgt == MY_LORA_ID) || (trgt == "all"))){
             if(value == "ON"){
                 MotorController.setPower(1);
@@ -57,42 +57,60 @@ void ChipChop_onCommandReceived(String target_component,String value, String sou
             }
 
         } else if (target_component == "Select"){
-            trgt = value;
+            if(value == "all" || value == MY_LORA_ID){
+                MotorController.setActive(1);
+            }else{
+                MotorController.setActive(0);
             }
+        }
 
         LoraController.send(trgt ,request,"set");
+        #endif
+
+        #if MY_LORA_MODE == LORA_BEACON
+        LoraController.send("esp1", request, "forward");
+        #endif
+
+        #if MY_LORA_MODE == LORA_BASE
+        LoraController.send(trgt ,request,"set");
+        #endif 
 
         ChipChop.updateStatus(target_component,value);
    
 
 }
-#endif
+//#endif
 
 unsigned long heap_timer = 0;
+unsigned long wifi_timer = 0;
+unsigned long wifi_wait = 0;
 
 void setup(){
 
         Serial.begin(115200);
-        delay(1000);
+        delay(3000);
 
-    #if MY_LORA_MODE == LORA_NODE
+//    #if MY_LORA_MODE == LORA_NODE || MY_LORA_MODE == LORA_BASE
 
-        WiFi.begin("Buldog 2.4", "&ojaZA=h37h0k?pha");
+//        WiFi.begin("Buldog 2.4", "&ojaZA=h37h0k?pha");
 //        WiFi.begin("Pokedex", "asdfghjkl");
 
-        Serial.print("WiFi Connecting");
-        while (WiFi.status() != WL_CONNECTED)
-        {
-            delay(500);
-            Serial.print(".");
-        }
-
+//        wifi_wait = millis();
+//        Serial.print("WiFi Connecting");
+//        while (WiFi.status() != WL_CONNECTED && millis() - wifi_wait < 30000)
+//        {
+//            delay(500);
+//            Serial.print(".");
+//        }
+        WifiPortal.ssid("Pokedex", "asdfghjkl");
+//        WifiPortal.ssid("Buldog 2.4", "&ojaZA=h37h0k?pha");
+        delay(5000);
 
 
         ChipChop.debug(true); //set to false for production
         ChipChop.commandCallback(ChipChop_onCommandReceived);
         ChipChop.start(server_uri, uuid, device_id, auth_code);
-    #endif
+//    #endif
 
     ChipChopPlugins.start();
     SystemController.start();
@@ -102,9 +120,21 @@ void setup(){
 }
 
 void loop(){
-    #if MY_LORA_MODE == LORA_NODE
+//    #if MY_LORA_MODE == LORA_NODE || MY_LORA_MODE == LORA_BASE
     ChipChop.run();
-    #endif
+
+//    if ((WiFi.status() != WL_CONNECTED) && (millis() - wifi_timer > 1000)){
+//        Serial.print("Reconnecting to Wifi...");
+//        WiFi.reconnect();
+//        while ((WiFi.status() != WL_CONNECTED) && (millis() - wifi_wait < 60000)){
+//            delay(500);
+//            Serial.print(".");
+//        }
+//        wifi_timer = millis();
+//        wifi_wait = millis();
+//    }
+    
+//    #endif
     
     ChipChopPlugins.run();
     SystemController.run();
@@ -117,7 +147,6 @@ void loop(){
 
         heap_timer = millis();
     }
-    
 }
 
 

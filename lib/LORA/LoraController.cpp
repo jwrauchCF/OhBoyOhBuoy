@@ -115,6 +115,7 @@ void LoraManager::receive(String request,int signal_strength){
                 found(id,signal_strength); //not relevant, just to mark the isAlive
                 return;
             }
+
                 
             int sender_swarm_mode = found(id,signal_strength);
             if(sender_swarm_mode == 0){
@@ -123,12 +124,17 @@ void LoraManager::receive(String request,int signal_strength){
             String target = JSON.find(request, "trgt"); 
             String message = JSON.find(request, "msg");
 
+            if(command == "forward" && MY_LORA_MODE == LORA_NODE){
+                LoraController.emit_event(LORA_MESSAGE_RECEIVED, message);
+                send("all", message, "set");
+                return;
+            }
 
             // I'm either a beacon receiving a message from the Node or I am the Node receiving my own message
             // any message to "all" should be already handled by the Node internally
             if(target == "all" && sender_swarm_mode == LORA_NODE && MY_LORA_MODE == LORA_BEACON){
-               Serial.print("msg = ");
-               Serial.println(message);
+                Serial.print("msg = ");
+                Serial.println(message);
                 LoraController.emit_event(LORA_MESSAGE_RECEIVED,message);
                 return;
                 
@@ -140,6 +146,12 @@ void LoraManager::receive(String request,int signal_strength){
                 LoraController.emit_event(LORA_MESSAGE_RECEIVED,message);
                 return;
             }
+
+//            // I'm a beacon and this is a direct message from base.  
+//            if (MY_LORA_MODE == LORA_BEACON && sender_swarm_mode == LORA_BASE) {
+//                send("esp1", message, "forward");
+//                return;
+//            }
 
             // I'm a Lora Node and this is a message from a beacon
             if(target == MY_LORA_ID && MY_LORA_MODE == LORA_NODE && sender_swarm_mode == LORA_BEACON){

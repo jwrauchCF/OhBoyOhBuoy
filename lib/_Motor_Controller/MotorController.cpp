@@ -47,10 +47,21 @@ void MotorManager::init(){
 }
 
 void MotorManager::setPower(bool val){
+    if (active){
+        if(val == 1){
+            start_motor(current_RPM);
+        }else{
+            stop_motor();
+        }
+    }
+
+}
+
+void MotorManager::setActive(bool val){
     if(val == 1){
-        start_motor(current_RPM);
+        active = 1;
     }else{
-        stop_motor();
+        active = 0;
     }
 }
 
@@ -58,7 +69,7 @@ void MotorManager::start_motor(int rpm) {
     Serial.println("Starting ramp up");
     for (int r = minRPM; r < rpm; r += stepSize) {
         UART.setRPM(r);
-        delay(20);
+        delay(5);
     }
     UART.setRPM(rpm);
     getStatus();
@@ -71,7 +82,7 @@ void MotorManager::stop_motor() {
     Serial.println("Starting ramp down");
     for (int r = current_RPM; r >= minRPM; r -= stepSize) {
         UART.setRPM(r);
-        delay(20);
+        delay(5);
     }
     UART.setRPM(0);
     getStatus();
@@ -83,17 +94,19 @@ void MotorManager::stop_motor() {
 
 void MotorManager::setDirection(bool val){
 
-    //if motor is running, stop it and then change direction
-    if(power == 1){
-        setPower(0);
-        // ChipChop.triggerEvent("power","OFF");
-    }
-    if(val == 1){
-        direction = 1;
-        current_RPM = abs(maxRPM);
-    }else{
-        direction = 0;
-        current_RPM = -1 * abs(maxRPM);
+    if (active){
+        //if motor is running, stop it and then change direction
+        if(power == 1){
+            setPower(0);
+            // ChipChop.triggerEvent("power","OFF");
+        }
+        if(val == 1){
+            direction = 1;
+            current_RPM = abs(maxRPM);
+        }else{
+            direction = 0;
+            current_RPM = -1 * abs(maxRPM);
+        }
     }
 }
 

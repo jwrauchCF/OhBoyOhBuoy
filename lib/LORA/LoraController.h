@@ -26,10 +26,10 @@ class LoraManager{
 
         _SWARM_DEVICE my_swarm[LORA_SWARM_SIZE] = {
             {0,LORA_BASE,"base",0,-1000},
-            {0,LORA_NODE,"esp1",0,-1000},
-            {0,LORA_BEACON,"esp2",0,-1000},
-            {0,LORA_BEACON,"esp3",0,-1000},
-            {0,LORA_BEACON,"esp4",0,-1000}
+            {0,LORA_NODE,"comrade_1",0,-1000},
+            {0,LORA_BEACON,"comrade_2",0,-1000},
+            {0,LORA_BEACON,"comrade_3",0,-1000},
+            {0,LORA_BEACON,"comrade_4",0,-1000}
         };
 
         byte status = LORA_IDLE;

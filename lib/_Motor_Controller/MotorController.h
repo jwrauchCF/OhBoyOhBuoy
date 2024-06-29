@@ -18,18 +18,19 @@ class MotorManager{
 
         unsigned long vesc_push_timer = 0;
 
-        unsigned long TRAVEL_CHECK_INTERVAL = 10000;
+        unsigned long TRAVEL_CHECK_INTERVAL = 5000;
         unsigned long travel_check_timer = 0;
         bool check_travel = 0;
+
+        unsigned long CC_update_timer = 0;
 
         bool power = 0;
         bool direction = 1; // 1. forward 0.back
         int speed = 20;
-        bool active = 1;
 
-        int maxRPM = 6750;
+        int maxRPM = 5600;
         int minRPM = 900;
-        int current_RPM = 6750;
+        int current_RPM = 5600;
         int stepSize = 50;
         int delayTime = 20; //???
 
@@ -39,7 +40,8 @@ class MotorManager{
         float current_distance = 0;
 
         int active_speed = 0;
-        int current = 0;
+        float input_current = 0;
+        float motor_current = 0;
         float voltage = 0.0;
         int health = 0;
 

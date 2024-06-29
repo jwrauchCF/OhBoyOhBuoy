@@ -48,9 +48,9 @@
 #define LORA_BASE 3
 
 #define LORA_SWARM_SIZE 5
-#define MY_LORA_MODE LORA_BEACON
+#define MY_LORA_MODE LORA_BASE
 #define MY_LORA_GROUP "boybuoy"
-#define MY_LORA_ID "esp4"
+#define MY_LORA_ID "base"
 
 //todo: define lora events
 #define LORA_MESSAGE_RECEIVED 1

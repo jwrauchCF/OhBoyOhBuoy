@@ -71,32 +71,14 @@ void SystemManager::handleLoraMessage(const String& msg){
 
 /// MOTOR HANDLER ///
 void SystemManager::handleMotor(String command, String value){
-    Serial.println(command);
-    Serial.println(value);
-    if(command == "power"){
-        if(value == "ON"){
-//            Serial.println("Starting motor");
-            MotorController.setPower(1);
-        }else{
-//            Serial.println("Stopping motor");
-            MotorController.setPower(0);
-        }
-        
-    }else if(command == "direction"){
-        if(value == "forward"){
-            MotorController.setDirection(1);
-        }else{
-            MotorController.setDirection(0);
-        }
-        
-    }else if(command == "Select"){
-        if(value == "all" || value == MY_LORA_ID){
-            MotorController.setActive(1);
-        }else{
-            MotorController.setActive(0);
-        }
-//    }else if(command == "speed"){
-//        MotorController.setSpeed(value.toInt());
+    if (value == "raise") {
+        MotorController.setDirection(1);
+        MotorController.setPower(1);
+    } else if (value == "lower") {
+        MotorController.setDirection(0);
+        MotorController.setPower(1);
+    } else {
+        MotorController.setPower(0);
     }
 }
 

@@ -32,12 +32,8 @@ void MotorManager::init(){
 
     if (UART.getVescValues()) {
         Serial.println("VESC Data Setup Success!");
-        Serial.print("RPM:");
-        Serial.println(UART.data.rpm);
         Serial.print("Input Voltage:");
         Serial.println(UART.data.inpVoltage);
-        Serial.print("Amp Hours:");
-        Serial.println(UART.data.ampHours);
 
         Serial.println("VESC connection successful!");
       } else {
@@ -47,21 +43,10 @@ void MotorManager::init(){
 }
 
 void MotorManager::setPower(bool val){
-    if (active){
-        if(val == 1){
-            start_motor(current_RPM);
-        }else{
-            stop_motor();
-        }
-    }
-
-}
-
-void MotorManager::setActive(bool val){
     if(val == 1){
-        active = 1;
+        start_motor(current_RPM);
     }else{
-        active = 0;
+        stop_motor();
     }
 }
 
@@ -94,45 +79,38 @@ void MotorManager::stop_motor() {
 
 void MotorManager::setDirection(bool val){
 
-    if (active){
-        //if motor is running, stop it and then change direction
-        if(power == 1){
-            setPower(0);
-            // ChipChop.triggerEvent("power","OFF");
-        }
-        if(val == 1){
-            direction = 1;
-            current_RPM = abs(maxRPM);
-        }else{
-            direction = 0;
-            current_RPM = -1 * abs(maxRPM);
-        }
+    //if motor is running, stop it and then change direction
+    if(power == 1){
+        setPower(0);
+        // ChipChop.triggerEvent("power","OFF");
+    }
+    if(val == 1){
+        direction = 1;
+        current_RPM = abs(maxRPM);
+    }else{
+        direction = 0;
+        current_RPM = -1 * abs(maxRPM);
     }
 }
-
-//void MotorManager::setSpeed(int val){
-//
-//    // no idea if we can set the speed whilst the motor is running?
-//    speed = val;
-//    int r = val * (maxRPM-minRPM) / 100 + minRPM;
-//    if ((r > minRPM) && (r < maxRPM)) {
-//        current_RPM = r;
-//    } else {
-//        current_RPM = 0;
-//    }
-//}
 
 void MotorManager::getStatus(){
         UART.getVescValues();
         active_speed = UART.data.rpm / 4;
-        current = UART.data.avgInputCurrent;
+        input_current = UART.data.avgInputCurrent;
+        motor_current = UART.data.avgMotorCurrent;
         voltage = UART.data.inpVoltage;
+        ChipChop.updateStatus("voltage", voltage);
+        ChipChop.updateStatus("input_current", input_current);
+        ChipChop.updateStatus("motor_current", motor_current);
+        ChipChop.updateStatus("rpm", active_speed);
         Serial.print("RPM:");
         Serial.println(active_speed);
-        Serial.print("Input Voltage:");
+        Serial.print("Voltage:");
         Serial.println(voltage);
         Serial.print("Input Current:");
-        Serial.println(current);
+        Serial.println(input_current);
+        Serial.print("Motor Current:");
+        Serial.println(motor_current);
 
         //TODO: do an error check, if the UART.getVescValues() fails flag the health to an error and broadcast it as an event
 
@@ -166,6 +144,11 @@ void MotorManager::run(){
         //TODO: update the travel distance and once the target is reached stop the motor and broadcast the status
 
         vesc_push_timer = millis();
+    }
+
+    if (millis() - CC_update_timer > 5000) {
+        CC_update_timer = millis();
+        getStatus();
     }
 
     if(check_travel){

@@ -19,13 +19,11 @@ extern json_mini JSON;
 String server_uri = "wss://api3.chipchop.io/wsdev/";
 String uuid = "ChpChpUsRapi3x3f1d594827f9403380022736f8461dff";
 String auth_code = "50a1f9bd3bfa41d39b84554935c55837";
-String device_id = "motor_test_1";
+String device_id = "comrade_base";
 
 
 const String _quote = "\"";
-String trgt = "all";
 
-//#if MY_LORA_MODE == LORA_NODE || MY_LORA_MODE == LORA_BASE
 void ChipChop_onCommandReceived(String target_component,String value, String source, int command_age){
         Serial.println(target_component);
         Serial.println(value);
@@ -41,45 +39,26 @@ void ChipChop_onCommandReceived(String target_component,String value, String sou
         request = request + " ";
 
 
-        #if MY_LORA_MODE == LORA_NODE
-        if((target_component == "power") && ((trgt == MY_LORA_ID) || (trgt == "all"))){
-            if(value == "ON"){
-                MotorController.setPower(1);
-            }else{
-                MotorController.setPower(0);
-            }
-            
-        }else if(target_component == "direction"){
-            if(value == "forward"){
-                MotorController.setDirection(1);
-            }else{
-                MotorController.setDirection(0);
-            }
-
-        } else if (target_component == "Select"){
-            if(value == "all" || value == MY_LORA_ID){
-                MotorController.setActive(1);
-            }else{
-                MotorController.setActive(0);
-            }
+        #if MY_LORA_MODE == LORA_NODE || MY_LORA_MODE == LORA_BEACON
+        if (value == "raise") {
+            MotorController.setDirection(1);
+            MotorController.setPower(1);
+        } else if (value == "lower") {
+            MotorController.setDirection(0);
+            MotorController.setPower(1);
+        } else {
+            MotorController.setPower(0);
         }
-
-        LoraController.send(trgt ,request,"set");
-        #endif
-
-        #if MY_LORA_MODE == LORA_BEACON
-        LoraController.send("esp1", request, "forward");
         #endif
 
         #if MY_LORA_MODE == LORA_BASE
-        LoraController.send(trgt ,request,"set");
+        LoraController.send(target_component, request, "set");
         #endif 
 
         ChipChop.updateStatus(target_component,value);
    
 
 }
-//#endif
 
 unsigned long heap_timer = 0;
 unsigned long wifi_timer = 0;
@@ -102,8 +81,9 @@ void setup(){
 //            delay(500);
 //            Serial.print(".");
 //        }
-        WifiPortal.ssid("Pokedex", "asdfghjkl");
-//        WifiPortal.ssid("Buldog 2.4", "&ojaZA=h37h0k?pha");
+//        WifiPortal.ssid("Pokedex", "asdfghjkl");
+//        WifiPortal.ssid("comrade_base", "1234567890");
+        WifiPortal.ssid("Buldog 2.4", "&ojaZA=h37h0k?pha");
         delay(5000);
 
 
